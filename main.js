@@ -87,6 +87,33 @@ view Main {
   }
 }
 
+
+
+view QourmIndicator {
+
+  let value = view.props.value
+
+  <div onClick={() => {value++}}>
+    {`+${value}`}
+  </div>
+
+  $ = {
+    color: 'white',
+    float: 'right',
+    borderRadius: '50%',
+    margin: '10px 14px 0 0',
+    width: 37,
+    height: 37,
+    lineHeight: 2.6,
+    textAlign: 'center',
+    fontWeight: Font.Weight.Regular,
+    fontSize: Font.Size.Quorum,
+    backgroundColor: Colors.Green,
+  }
+
+}
+
+
 view MeetingTypeButton {
 
   let type = view.props.type;
@@ -101,14 +128,23 @@ view MeetingTypeButton {
     type = newType
   }
 
-  <img
-    src={`/_/static/${type == MeetingType.EBoard ? 'eboard' : 'brotherhood'}.svg`}
-    onClick={changeMeetingType}
-  />
+  <div onClick={changeMeetingType}>
+    {type == MeetingType.EBoard ? 'E' : 'B'}
+  </div>
 
   $ = {
+    color: 'white',
     float: 'right',
+    width: 37,
+    height: 37,
+    lineHeight: 2,
+    paddingLeft: 1,
+    borderRadius: '50%',
+    textAlign: 'center',
     margin: '10px 14px 0 0',
+    fontWeight: Font.Weight.Medium,
+    fontSize: Font.Size.MeetingType,
+    backgroundColor: type == MeetingType.EBoard ? Colors.Orange : Colors.Purple,
   }
 
 }
@@ -165,6 +201,7 @@ view MinutesCard {
 
   <div class='header'>
     <div class='title'>December 9th, 2015</div>
+    <QourmIndicator value={14}></QourmIndicator>
     <MeetingTypeButton type={meetingType} onTypeChange={function(){}}></MeetingTypeButton>
   </div>
   <div class='separator'></div>
@@ -190,7 +227,7 @@ view MinutesCard {
     fontSize: Font.Size.Title,
     marginLeft: 20,
     marginTop: 17,
-    marginBottom: 12,
+    marginBottom: 10,
     display: 'inline-block',
   }
 
