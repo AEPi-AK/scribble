@@ -149,68 +149,63 @@ view MeetingTypeButton {
 }
 
 view Notes {
-  // <pre>{view.props.content}</pre>
   <Editor content={view.props.content}/>
 
   $ = {
     whiteSpace: 'pre-wrap',
     fontSize: Font.Size.Text,
-    width: 650,
   }
 
-  $pre = {
-    margin: 0,
-    whiteSpace: 'pre-line',
+  $Editor = {
+    margin: 20,
   }
 }
 
 view MinutesCard {
 
-  const notesContent = `
-  The meeting was called to order at 1:08 p.m.
+  const notesContent = `The meeting was called to order at 1:08 p.m.
 
-  ---
+---
 
-  Passing of the Brotherhood Minutes from November 29th, 2015.
+Passing of the Brotherhood Minutes from November 29th, 2015.
 
-  Passing of the Executive Board Minutes from November 30th, 2015.
+Passing of the Executive Board Minutes from November 30th, 2015.
 
-  ---
-  #### The Pledgemaster reported
+---
+#### The Pledgemaster reported
 
-  - Reaching out to bros for lt pledgemaster.
-  - Will have decided by next semester.
+- Reaching out to bros for lt pledgemaster.
+- Will have decided by next semester.
 
-  ---
-  #### The Sentinel reported
+---
+#### The Sentinel reported
 
-  - Good job not being too risky at semi-formal.
-  - I didn't get a lot of texts this weekend. Text your risk man or let us know in person.
+- Good job not being too risky at semi-formal.
+- I didn't get a lot of texts this weekend. Text your risk man or let us know in person.
 
-  ---
-  #### The Steward reported
+---
+#### The Steward reported
 
-  - Overall, people did a good job this week. Keep it up.
-  - Looking at ways to change ways of distributing waiter duties. stay tuned next semester. Come talk to me if you have input.
-  - Please do your waiter duties.
+- Overall, people did a good job this week. Keep it up.
+- Looking at ways to change ways of distributing waiter duties. stay tuned next semester. Come talk to me if you have input.
+- Please do your waiter duties.
 
-  ---
-  #### The Member at Large reported
+---
+#### The Member at Large reported
 
-  - IFC is this Tuesday at 9:30 p.m.
-  - Not so much going on. New IFC executive board has been installed, congrats to Brother Loomis. (IFC Exec is now: 2 SAE, 1 Pike, 2 SigEp, 1 Sig Chi, 1 Alpha Sig, 1 AEPi)
-  - I'm continuing to talk 1 on 1 to brothers.
+- IFC is this Tuesday at 9:30 p.m.
+- Not so much going on. New IFC executive board has been installed, congrats to Brother Loomis. (IFC Exec is now: 2 SAE, 1 Pike, 2 SigEp, 1 Sig Chi, 1 Alpha Sig, 1 AEPi)
+- I'm continuing to talk 1 on 1 to brothers.
 
-  ---
-  #### The Exchequer reported
+---
+#### The Exchequer reported
 
-  - Brother Master: Come light [candles] with me.
+- Brother Master: Come light [candles] with me.
 
-  ---
-  Good & Welfare
-  ---
-  The meeting was adjourned at 1:48 p.m.
-  `;
+---
+Good & Welfare
+---
+The meeting was adjourned at 1:48 p.m.`;
 
   let meetingType = MeetingType.Brotherhood;
 
@@ -258,7 +253,7 @@ view Sidebar {
     width: 260,
     height: 899,
     float: 'right',
-    marginTop: -890,
+    marginTop: -919,
     backgroundColor: Colors.Light,
     borderBottomRightRadius: 10,
   }
