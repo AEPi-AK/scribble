@@ -6,6 +6,9 @@
   "version": "1.0.0",
   "main": "",
   "scripts": {},
-  "dependencies": {},
+  "dependencies": {
+    "brace": "^0.7.0",
+    "react-ace": "^3.0.0"
+  },
   "installed": []
 }

@@ -149,12 +149,12 @@ view MeetingTypeButton {
 }
 
 view Notes {
-  <pre>{view.props.content}</pre>
+  // <pre>{view.props.content}</pre>
+  <Editor content={view.props.content}/>
 
   $ = {
     whiteSpace: 'pre-wrap',
     fontSize: Font.Size.Text,
-    marginLeft: 20,
     width: 650,
   }
 
@@ -256,9 +256,9 @@ view Sidebar {
 
   $ = {
     width: 260,
-    height: 895,
+    height: 899,
     float: 'right',
-    marginTop: -864,
+    marginTop: -890,
     backgroundColor: Colors.Light,
     borderBottomRightRadius: 10,
   }
@@ -327,7 +327,8 @@ view BrotherList {
 
   $ = {
     overflow: 'auto',
-    height: 864-30,
+    height: 864-25,
+
   }
 }
 
