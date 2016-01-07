@@ -6,7 +6,7 @@ import 'brace/keybinding/vim'
 view Editor {
 
   const onLoad = editor => {
-    editor.setKeyboardHandler("ace/keyboard/vim");
+    // editor.setKeyboardHandler("ace/keyboard/vim");
   }
 
   <AceEditor

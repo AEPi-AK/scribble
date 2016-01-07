@@ -139,3 +139,9 @@ input[type='search']::-webkit-input-placeholder {
 .ace_content {
   background-color: #EEEEEE;
 }
+
+.ace-dawn .ace_list, .ace-dawn .ace_markup.ace_list, .ace-dawn .ace_support.ace_function {
+}
+
+.normal-mode .ace-cursor {
+}

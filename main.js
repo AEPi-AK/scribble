@@ -89,13 +89,14 @@ view Main {
   }
 }
 
-view QourmIndicator {
+view QourumIndicator {
 
-  let value = view.props.value
+  let quorum = total => Math.round(total / 2) + 1
+  let overQuorum = (present, total) => present - quorum(total)
 
-  <div onClick={() => {value++}}>
-    {`+${value}`}
-  </div>
+  <count>
+    {`+${overQuorum(view.props.present, view.props.total)}`}
+  </count>
 
   $ = {
     color: 'white',
@@ -108,7 +109,7 @@ view QourmIndicator {
     textAlign: 'center',
     fontWeight: Font.Weight.Regular,
     fontSize: Font.Size.Quorum,
-    backgroundColor: Colors.Green,
+    backgroundColor: overQuorum(view.props.present, view.props.total) >= 0 ? Colors.Green: Colors.Red,
   }
 
 }
@@ -209,14 +210,32 @@ The meeting was adjourned at 1:48 p.m.`;
 
   let meetingType = MeetingType.Brotherhood;
 
+  let brothers = [...Array(56).keys()].map(id => {
+    return {
+      id,
+      isSelected: false,
+      isPresent: true,
+      name: 'Carovi Hermanoff ' + Math.round(Math.random() * 100),
+    }
+  });
+
   <div class='header'>
     <title>December 9th, 2015</title>
-    <QourmIndicator value={14}/>
-    <MeetingTypeButton type={meetingType} onTypeChange={() => {}}/>
+    <QourumIndicator
+      present={brothers.filter(b => b.isPresent).length}
+      total={brothers.length}
+    />
+    <MeetingTypeButton
+      type={meetingType}
+      onTypeChange={() => {}}
+    />
   </div>
   <separator/>
   <Notes content={notesContent}/>
-  <Sidebar/>
+  <Sidebar
+    brothers={brothers}
+    brothersChanged={newBrothers => brothers = newBrothers}
+  />
 
   $ = {
     width: 937,
@@ -247,7 +266,7 @@ view Sidebar {
   let searchText = ''
 
   <SearchBox onChange={newText => searchText = lower(newText)}/>
-  <BrotherList searchText={searchText}/>
+  <BrotherList yield searchText={searchText}/>
 
   $ = {
     width: 260,
@@ -293,14 +312,7 @@ view BrotherItem {
 
 view BrotherList {
 
-  let brothers = [...Array(56).keys()].map(id => {
-    return {
-      id,
-      isSelected: false,
-      isPresent: true,
-      name: 'Carovi Hermanoff ' + Math.round(Math.random() * 100),
-    }
-  });
+  let brothers = view.props.brothers
 
   let selected = null
 
@@ -311,9 +323,14 @@ view BrotherList {
 
   const matchesSearch = b => lower(b.name).includes(view.props.searchText)
 
+  const setBrothers = newBrothers => {
+    brothers = newBrothers
+    view.props.brothersChanged(brothers)
+  }
+
   <BrotherItem
     onSelect={() => selected = _}
-    onToggle={() => brothers = toggle(_, brothers)}
+    onToggle={() => setBrothers(toggle(_, brothers))}
     isSelected={selected == _}
     repeat={brothers.filter(matchesSearch)}
     brother={_}
