@@ -127,3 +127,7 @@ body td { display: table-cell; }
 body tbody { display: table-row-group; }
 body thead { display: table-header-group; }
 body tr { display: table-row; }
+
+input[type='search']::-webkit-input-placeholder {
+  color: #6E6E6E;
+}

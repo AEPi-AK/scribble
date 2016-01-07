@@ -1,3 +1,5 @@
+const lower = s => s.toLowerCase()
+
 const ASCII = {
   Left: 37,
   Up: 38,
@@ -41,31 +43,31 @@ const Colors = {
 
 view Main {
 
-  let brothers
-  let index = 0
-
-  load()
-
-  async function load() {
-    brothers = await fetch.json('/_/static/brothers.json');
-    brothers.sort((a, b) => {
-      if (a.isEBoard) return -1
-      if (b.isEBoard) return 1
-      if (a.last < b.last) return -1
-      if (a.last > b.last) return 1
-      return 0
-    })
-  }
-
-  on.keydown(e => {
-    if (e.keyCode == ASCII.Left) {
-      index = Math.max(index -  1, 0);
-    }
-    else if (e.keyCode == ASCII.Right) {
-      index = Math.min(index + 1, brothers.length - 1);
-    }
-    view.update();
-  });
+  // let brothers
+  // let index = 0
+  //
+  // load()
+  //
+  // async function load() {
+  //   brothers = await fetch.json('/_/static/brothers.json');
+  //   brothers.sort((a, b) => {
+  //     if (a.isEBoard) return -1
+  //     if (b.isEBoard) return 1
+  //     if (a.last < b.last) return -1
+  //     if (a.last > b.last) return 1
+  //     return 0
+  //   })
+  // }
+  //
+  // on.keydown(e => {
+  //   if (e.keyCode == ASCII.Left) {
+  //     index = Math.max(index -  1, 0);
+  //   }
+  //   else if (e.keyCode == ASCII.Right) {
+  //     index = Math.min(index + 1, brothers.length - 1);
+  //   }
+  //   view.update();
+  // });
 
   // <content if={brothers}>
   //   <AttendanceCard brother={brothers[index]}></AttendanceCard>
@@ -87,8 +89,6 @@ view Main {
   }
 }
 
-
-
 view QourmIndicator {
 
   let value = view.props.value
@@ -101,7 +101,7 @@ view QourmIndicator {
     color: 'white',
     float: 'right',
     borderRadius: '50%',
-    margin: '10px 14px 0 0',
+    margin: '12px 14px 0 0',
     width: 37,
     height: 37,
     lineHeight: 2.6,
@@ -112,7 +112,6 @@ view QourmIndicator {
   }
 
 }
-
 
 view MeetingTypeButton {
 
@@ -141,12 +140,28 @@ view MeetingTypeButton {
     paddingLeft: 1,
     borderRadius: '50%',
     textAlign: 'center',
-    margin: '10px 14px 0 0',
+    margin: '12px 10px 0 0',
     fontWeight: Font.Weight.Medium,
     fontSize: Font.Size.MeetingType,
     backgroundColor: type == MeetingType.EBoard ? Colors.Orange : Colors.Purple,
   }
 
+}
+
+view Notes {
+  <pre>{view.props.content}</pre>
+
+  $ = {
+    whiteSpace: 'pre-wrap',
+    fontSize: Font.Size.Text,
+    marginLeft: 20,
+    width: 650,
+  }
+
+  $pre = {
+    margin: 0,
+    whiteSpace: 'pre-line',
+  }
 }
 
 view MinutesCard {
@@ -200,16 +215,13 @@ view MinutesCard {
   let meetingType = MeetingType.Brotherhood;
 
   <div class='header'>
-    <div class='title'>December 9th, 2015</div>
-    <QourmIndicator value={14}></QourmIndicator>
-    <MeetingTypeButton type={meetingType} onTypeChange={function(){}}></MeetingTypeButton>
+    <title>December 9th, 2015</title>
+    <QourmIndicator value={14}/>
+    <MeetingTypeButton type={meetingType} onTypeChange={() => {}}/>
   </div>
-  <div class='separator'></div>
-  <div class='notes'>
-    <pre>{notesContent}</pre>
-  </div>
-  <div class='sidebar'>
-  </div>
+  <separator/>
+  <Notes content={notesContent}/>
+  <Sidebar/>
 
   $ = {
     width: 937,
@@ -219,15 +231,12 @@ view MinutesCard {
     boxShadow: `0 2px 5px 0px ${Colors.Shadow}`
   }
 
-  $header = {
-  }
-
   $title = {
     fontWeight: Font.Weight.Medium,
     fontSize: Font.Size.Title,
     marginLeft: 20,
     marginTop: 17,
-    marginBottom: 10,
+    marginBottom: 8,
     display: 'inline-block',
   }
 
@@ -237,68 +246,124 @@ view MinutesCard {
     height: 2,
   }
 
-  $notes = {
-    whiteSpace: 'pre-wrap',
-    fontSize: Font.Size.Text,
-    marginLeft: 20,
-    width: 650,
-  }
+}
 
-  $pre = {
-    margin: 0,
-    whiteSpace: 'pre-line',
-  }
+view Sidebar {
+  let searchText = ''
 
-  $sidebar = {
+  <SearchBox onChange={newText => searchText = lower(newText)}/>
+  <BrotherList searchText={searchText}/>
+
+  $ = {
     width: 260,
     height: 895,
     float: 'right',
     marginTop: -864,
     backgroundColor: Colors.Light,
     borderBottomRightRadius: 10,
-
   }
-
 }
 
-view StatusIcon {
-  <img src={view.props.on ? '/_/static/check.svg' : '/_/static/cancel.svg'}>
-  </img>
-}
+view BrotherItem {
 
-view AttendanceCard {
-  <name>Brother {view.props.brother.last}</name>
-  <img class="avatar" src={view.props.brother.avatarURL || 'https://scontent-iad3-1.xx.fbcdn.net/hphotos-xft1/v/t1.0-9/11061191_10207117437160503_6933297688243743861_n.jpg?oh=0f998433b7d42d81c9fa992880fc8730&oe=5721071D'}></img>
-  <StatusIcon on={view.props.brother.isPresent}></StatusIcon>
-
-  on.keyup(e => {
-    if (e.keyCode == ASCII.Up) {
-      view.props.brother.isPresent = true;
-    }
-    else if (e.keyCode == ASCII.Down) {
-      view.props.brother.isPresent = false;
-    }
-    view.update();
-  });
-
-  $avatar = {
-    width: '100%',
-    height: 'auto',
-    marginTop: 10,
-    marginBottom: 15,
-  }
+  <wrapper onClick={view.props.onSelect}>
+    <status onClick={view.props.onToggle}/>
+    <name>{view.props.brother.name}</name>
+  </wrapper>
 
   $ = {
-    width: 350,
-    height: 500,
-    textAlign: 'center',
-    backgroundColor: view.props.brother.isPresent ? Colors.Green : Colors.Red,
-    borderRadius: 10,
-    backgroundSize: 'cover',
-    fontSize: '1.7rem',
-    paddingTop: 15,
-    paddingBottom: 15,
-    boxShadow: '0 0 10px black'
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingLeft: 13,
+    userSelect: 'none',
+    backgroundColor: view.props.isSelected ? '#D6D6D6' : 'transparent',
+    cursor: 'pointer',
   }
 
+  $status = {
+    width: 10,
+    height: 10,
+    borderRadius: '50%',
+    backgroundColor: view.props.brother.isPresent ? Colors.Green : Colors.Red,
+    display: 'inline-block',
+    marginRight: 13,
+  }
+
+  $name = {
+    fontWeight: Font.Weight.Light,
+    fontSize: Font.Size.Sidebar,
+    display: 'inline-block',
+  }
+}
+
+view BrotherList {
+
+  let brothers = [...Array(56).keys()].map(id => {
+    return {
+      id,
+      isSelected: false,
+      isPresent: true,
+      name: 'Carovi Hermanoff ' + Math.round(Math.random() * 100),
+    }
+  });
+
+  let selected = null
+
+  const setItem = (obj, x, xs) =>
+    xs.map(_x => _x.id == x.id ? Object.assign(x, obj) : _x)
+
+  const toggle = (b, bs) => setItem({ isPresent: !b.isPresent }, b, bs)
+
+  const matchesSearch = b => lower(b.name).includes(view.props.searchText)
+
+  <BrotherItem
+    onSelect={() => selected = _}
+    onToggle={() => brothers = toggle(_, brothers)}
+    isSelected={selected == _}
+    repeat={brothers.filter(matchesSearch)}
+    brother={_}
+    key={_.id}
+  />
+
+  $ = {
+    overflow: 'auto',
+    height: 864-30,
+  }
+}
+
+view SearchBox {
+  let searchText = ''
+
+  <img src='/_/static/search.svg'/>
+  <input
+    type='text'
+    sync={searchText}
+    onKeyUp={() => view.props.onChange(searchText)}
+    placeholder='search brothers'
+  />
+
+  $ = {
+    position: 'relative',
+    marginBottom: 3,
+  }
+
+  $img = {
+    position: 'absolute',
+    top: 21,
+    left: 28,
+  }
+
+  $input = {
+    border: `2px solid ${Colors.Gray}`,
+    fontFamily: 'Rubik',
+    fontSize: Font.Size.Sidebar,
+    width: '90%',
+    backgroundColor: Colors.Lighter,
+    textIndent: 35,
+    outline: 0,
+    height: 34,
+    marginLeft: 13,
+    marginTop: 13,
+    borderRadius: 100,
+  }
 }
