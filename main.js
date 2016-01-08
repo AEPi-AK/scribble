@@ -6,6 +6,7 @@ const ASCII = {
   Right: 39,
   Down: 40,
   Space: 32,
+  Slash: 191,
 }
 
 const MeetingType = {
@@ -43,38 +44,7 @@ const Colors = {
 
 view Main {
 
-  // let brothers
-  // let index = 0
-  //
-  // load()
-  //
-  // async function load() {
-  //   brothers = await fetch.json('/_/static/brothers.json');
-  //   brothers.sort((a, b) => {
-  //     if (a.isEBoard) return -1
-  //     if (b.isEBoard) return 1
-  //     if (a.last < b.last) return -1
-  //     if (a.last > b.last) return 1
-  //     return 0
-  //   })
-  // }
-  //
-  // on.keydown(e => {
-  //   if (e.keyCode == ASCII.Left) {
-  //     index = Math.max(index -  1, 0);
-  //   }
-  //   else if (e.keyCode == ASCII.Right) {
-  //     index = Math.min(index + 1, brothers.length - 1);
-  //   }
-  //   view.update();
-  // });
-
-  // <content if={brothers}>
-  //   <AttendanceCard brother={brothers[index]}></AttendanceCard>
-  //   <h4>{index + 1}/{brothers.length}</h4>
-  // </content>
   <MinutesCard/>
-  // <pre>{JSON.stringify(brothers)}</pre>
 
   $ = {
     display: 'flex',
@@ -92,10 +62,11 @@ view Main {
 view QourumIndicator {
 
   let quorum = total => Math.round(total / 2) + 1
-  let overQuorum = (present, total) => present - quorum(total)
+  let _overQuorum = (present, total) => present - quorum(total)
+  let overQuorum = () => _overQuorum(view.props.present, view.props.total)
 
   <count>
-    {`+${overQuorum(view.props.present, view.props.total)}`}
+    {`${overQuorum() > 0 ? '+' : ''}${overQuorum()}`}
   </count>
 
   $ = {
@@ -109,7 +80,7 @@ view QourumIndicator {
     textAlign: 'center',
     fontWeight: Font.Weight.Regular,
     fontSize: Font.Size.Quorum,
-    backgroundColor: overQuorum(view.props.present, view.props.total) >= 0 ? Colors.Green: Colors.Red,
+    backgroundColor: overQuorum() >= 0 ? Colors.Green: Colors.Red,
   }
 
 }
@@ -128,7 +99,13 @@ view MeetingTypeButton {
     type = newType
   }
 
-  <div onClick={changeMeetingType}>
+  <div
+    onClick={changeMeetingType}
+    title={(type == MeetingType.EBoard
+      ? 'executive board'
+      : 'brotherhood')
+      + ' meeting'}
+  >
     {type == MeetingType.EBoard ? 'E' : 'B'}
   </div>
 
@@ -210,12 +187,14 @@ The meeting was adjourned at 1:48 p.m.`;
 
   let meetingType = MeetingType.Brotherhood;
 
-  let brothers = [...Array(56).keys()].map(id => {
+  let brothers = __brothers.map((brother, i) => {
     return {
-      id,
-      isSelected: false,
+      id: i,
       isPresent: true,
-      name: 'Carovi Hermanoff ' + Math.round(Math.random() * 100),
+      isEBoard: brother.isEBoard,
+      first: brother.first,
+      last: brother.last,
+      name: `${brother.first} ${brother.last}`,
     }
   });
 
@@ -312,14 +291,52 @@ view BrotherItem {
 
 view BrotherList {
 
-  let brothers = view.props.brothers
+  const sortFn = (x, y) => {
+    if (x.isEBoard && !y.isEBoard) return -1;
+    if (y.isEBoard && !x.isEBoard) return 1;
+    return x.last + x.first < y.last + y.first ? -1 : 1;
+  }
 
-  let selected = null
+  let brothers = view.props.brothers.slice().sort(sortFn)
+
+  let searching = false
+  let selectedIndex = 0
+  // index before we started searching, which will be restored
+  // (i.e. selectedIndex will be set to this) when we stop searching
+  let prevSelectedIndex = 0
+
+  on.props(props => {
+    // user stopped searching
+    if (props.searchText == '') {
+      // we were searching before
+      if (searching) {
+        selectedIndex = prevSelectedIndex
+      }
+      searching = false
+    }
+    // user is searching
+    else {
+      // we weren't searching before
+      if (!searching) {
+        prevSelectedIndex = selectedIndex
+        selectedIndex = 0
+      }
+      searching = true
+    }
+  })
 
   const setItem = (obj, x, xs) =>
     xs.map(_x => _x.id == x.id ? Object.assign(x, obj) : _x)
 
   const toggle = (b, bs) => setItem({ isPresent: !b.isPresent }, b, bs)
+
+  const setPresent = (b, bs) => setItem({ isPresent: true }, b, bs)
+
+  const setAllPresent = bs => bs.map(b => Object.assign(b, { isPresent: true }))
+
+  const setAbsent = (b, bs) => setItem({ isPresent: false }, b, bs)
+
+  const setAllAbsent = bs => bs.map(b => Object.assign(b, { isPresent: false }))
 
   const matchesSearch = b => lower(b.name).includes(view.props.searchText)
 
@@ -328,14 +345,54 @@ view BrotherList {
     view.props.brothersChanged(brothers)
   }
 
+  const getBrothers = () => brothers.filter(matchesSearch)
+
   <BrotherItem
-    onSelect={() => selected = _}
+    onSelect={() => selectedIndex = getBrothers().indexOf(_)}
     onToggle={() => setBrothers(toggle(_, brothers))}
-    isSelected={selected == _}
-    repeat={brothers.filter(matchesSearch)}
+    isSelected={selectedIndex == getBrothers().indexOf(_)}
+    repeat={getBrothers()}
     brother={_}
     key={_.id}
   />
+
+  on.keydown(e => {
+    if (!(e.ctrlKey && e.metaKey)) return true
+
+    switch (e.keyCode) {
+      case ASCII.Up:
+        if (e.shiftKey) selectedIndex = 0
+        else selectedIndex = Math.max(selectedIndex - 1, 0)
+        break;
+      case ASCII.Down:
+        maxIndex = brothers.length - 1
+        if (e.shiftKey) selectedIndex = maxIndex
+        else selectedIndex = Math.min(selectedIndex + 1, maxIndex)
+        break;
+      case ASCII.Left:
+        if (e.shiftKey) {
+          newBrothers = brothers
+          getBrothers().forEach(brother => {
+            newBrothers = setAbsent(brother, brothers)
+          })
+          setBrothers(newBrothers)
+        }
+        else setBrothers(setAbsent(getBrothers()[selectedIndex], brothers))
+        break;
+      case ASCII.Right:
+        if (e.shiftKey) {
+          newBrothers = brothers
+          getBrothers().forEach(brother => {
+            newBrothers = setPresent(brother, brothers)
+          })
+          setBrothers(newBrothers)
+        }
+        else setBrothers(setPresent(getBrothers()[selectedIndex], brothers))
+        break;
+    }
+
+    return true
+  })
 
   $ = {
     overflow: 'auto',
@@ -347,11 +404,18 @@ view BrotherList {
 view SearchBox {
   let searchText = ''
 
+  on.keydown(e => {
+    if (!(e.ctrlKey && e.metaKey) || e.keyCode != ASCII.Slash) return true
+    view.refs.input.focus()
+    return true
+  })
+
   <img src='/_/static/search.svg'/>
   <input
     type='text'
     sync={searchText}
     onKeyUp={() => view.props.onChange(searchText)}
+    ref='input'
     placeholder='search brothers'
   />
 

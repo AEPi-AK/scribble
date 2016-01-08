@@ -3,16 +3,31 @@ import 'brace/mode/markdown'
 import 'brace/theme/dawn'
 import 'brace/keybinding/vim'
 
+const ASCII = {
+  Slash: 191
+}
+
 view Editor {
 
-  const onLoad = editor => {
+  let editor = null
+
+  const onLoad = newEditor => {
+    editor = newEditor
     // editor.setKeyboardHandler("ace/keyboard/vim");
   }
+
+  on.keydown(e => {
+    if (!(e.ctrlKey && e.metaKey && e.shiftKey) || e.keyCode != ASCII.Slash) {
+      return true
+    }
+    editor && editor.focus()
+    return true
+  })
 
   <AceEditor
     mode='markdown'
     theme='dawn'
-    onChange={newValue => console.log('change', newValue)}
+    onChange={newValue => console.warn('editor change ignored')}
     value={view.props.content}
     showGutter={false}
     showPrintMargin={false}
