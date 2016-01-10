@@ -166,10 +166,13 @@ view RenderedMinutes {
 
   function load() {
     let brothers = view.props.brothers.slice().sort(sortFn)
+    const isEBoard = view.props.meetingType == MeetingType.EBoard
     meetingName = _meetingName(view.props.meetingType)
     dateString = view.props.date.format(DATE_FMT, true)
     presentBrothers = formatBrothers(brothers.filter(b => b.isPresent))
-    absentBrothers = formatBrothers(brothers.filter(b => !b.isPresent))
+    absentBrothers = formatBrothers(brothers.filter(b => {
+      return !b.isPresent && (isEBoard ? b.isEBoard : true)
+    }))
   }
 
   <pre>{`## Minutes of the ${meetingName} Meeting \
