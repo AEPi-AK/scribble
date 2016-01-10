@@ -8,6 +8,8 @@ const sortFn = (a, b) => {
   return a.last + a.first < b.last + b.first ? -1 : 1;
 }
 
+const DATE_FMT = 'MMMM Do, YYYY'
+
 const ASCII = {
   Left: 37,
   Up: 38,
@@ -165,7 +167,7 @@ view RenderedMinutes {
   function load() {
     let brothers = view.props.brothers.slice().sort(sortFn)
     meetingName = _meetingName(view.props.meetingType)
-    dateString = view.props.dateString
+    dateString = view.props.date.format(DATE_FMT, true)
     presentBrothers = formatBrothers(brothers.filter(b => b.isPresent))
     absentBrothers = formatBrothers(brothers.filter(b => !b.isPresent))
   }
@@ -203,81 +205,62 @@ ${view.props.notesContent}`}</pre>
 }
 
 view MinutesCard {
+  const save = (k, v) => localStorage.setItem(k, JSON.stringify(v))
 
-  let notesContent = `The meeting was called to order at 1:08 p.m.
+  const load = k => JSON.parse(localStorage.getItem(k))
 
----
+  const hasKey = k => localStorage.hasOwnProperty(k)
 
-Passing of the Brotherhood Minutes from November 29th, 2015.
+  const ensureDefault = (k, v) => hasKey(k) ? void 0 : save(k, v)
 
-Passing of the Executive Board Minutes from November 30th, 2015.
+  class MinutesData {
 
----
-#### The Pledgemaster reported
-
-- Reaching out to bros for lt pledgemaster.
-- Will have decided by next semester.
-
----
-#### The Sentinel reported
-
-- Good job not being too risky at semi-formal.
-- I didn't get a lot of texts this weekend. Text your risk man or let us know in person.
-
----
-#### The Steward reported
-
-- Overall, people did a good job this week. Keep it up.
-- Looking at ways to change ways of distributing waiter duties. stay tuned next semester. Come talk to me if you have input.
-- Please do your waiter duties.
-
----
-#### The Member at Large reported
-
-- IFC is this Tuesday at 9:30 p.m.
-- Not so much going on. New IFC executive board has been installed, congrats to Brother Loomis. (IFC Exec is now: 2 SAE, 1 Pike, 2 SigEp, 1 Sig Chi, 1 Alpha Sig, 1 AEPi)
-- I'm continuing to talk 1 on 1 to brothers.
-
----
-#### The Exchequer reported
-
-- Brother Master: Come light [candles] with me.
-
----
-Good & Welfare
----
-The meeting was adjourned at 1:48 p.m.`;
-
-  let meetingType = MeetingType.Brotherhood;
-
-  let brothers = __brothers.map((brother, i) => {
-    return {
-      id: i,
-      isPresent: true,
-      isEBoard: brother.isEBoard,
-      first: brother.first,
-      last: brother.last,
-      name: `${brother.first} ${brother.last}`,
+    constructor() {
+      ensureDefault('type', MeetingType.Brotherhood)
+      ensureDefault('brothers', __brothers.map((brother, i) => {
+        return {
+          id: i,
+          isPresent: true,
+          isEBoard: brother.isEBoard,
+          first: brother.first,
+          last: brother.last,
+          name: `${brother.first} ${brother.last}`,
+        }
+      }))
+      ensureDefault('date', moment())
+      ensureDefault('content', `The meeting was called to order at 1:08 p.m.\r\n\r\n---\r\n\r\nPassing of the Brotherhood Minutes from November 29th, 2015.\r\n\r\nPassing of the Executive Board Minutes from November 30th, 2015.\r\n\r\n---\r\n#### The Pledgemaster reported\r\n\r\n- Reaching out to bros for lt pledgemaster.\r\n- Will have decided by next semester.\r\n\r\n---\r\n#### The Sentinel reported\r\n\r\n- Good job not being too risky at semi-formal.\r\n- I didn\'t get a lot of texts this weekend. Text your risk man or let us know in person.\r\n\r\n---\r\n#### The Steward reported\r\n\r\n- Overall, people did a good job this week. Keep it up.\r\n- Looking at ways to change ways of distributing waiter duties. stay tuned next semester. Come talk to me if you have input.\r\n- Please do your waiter duties.\r\n\r\n---\r\n#### The Member at Large reported\r\n\r\n- IFC is this Tuesday at 9:30 p.m.\r\n- Not so much going on. New IFC executive board has been installed, congrats to Brother Loomis. (IFC Exec is now: 2 SAE, 1 Pike, 2 SigEp, 1 Sig Chi, 1 Alpha Sig, 1 AEPi)\r\n- I\'m continuing to talk 1 on 1 to brothers.\r\n\r\n---\r\n#### The Exchequer reported\r\n\r\n- Brother Master: Come light [candles] with me.\r\n\r\n---\r\nGood & Welfare\r\n---\r\nThe meeting was adjourned at 1:48 p.m.`)
     }
-  });
 
-  let dateString = 'December 9th, 2015'
+    get type() { return load('type') }
+    set type(v) { save('type', v) }
 
-  let render = true
+    get brothers() { return load('brothers') }
+    set brothers(v) { save('brothers', v) }
+
+    get date() { return moment(load('date')) }
+    set date(v) { save('date', v) }
+
+    get content() { return load('content') }
+    set content(v) { save('content', v) }
+  }
+
+  let M = new MinutesData()
+
+  let render = false
 
   <div class='header'>
     <input type='text'
-      onChange={e => dateString = e.target.value}
-      value={dateString}
+      onChange={e => M.date = M.date}
+      value={M.date.format(DATE_FMT)}
       class='title'
     />
     <QourumIndicator
-      present={brothers.filter(b => b.isPresent).length}
-      total={brothers.length}
+      present={M.brothers.filter(b => b.isPresent).length}
+      total={M.brothers.length}
     />
     <MeetingTypeButton
-      type={meetingType}
-      onTypeChange={newMeetingType => meetingType = newMeetingType}
+      type={M.type}
+      onTypeChange={type => M.type = type}
     />
     <label>{'render'}
       <input
@@ -291,20 +274,20 @@ The meeting was adjourned at 1:48 p.m.`;
   <separator/>
   <Notes
     if={!render}
-    content={notesContent}
-    onChange={newContent => notesContent = newContent}
+    content={M.content}
+    onChange={content => M.content = content}
   />
   <Sidebar
     if={!render}
-    brothers={brothers}
-    brothersChanged={newBrothers => brothers = newBrothers}
+    brothers={M.brothers}
+    brothersChanged={brothers => M.brothers = brothers}
   />
   <RenderedMinutes
     if={render}
-    brothers={brothers}
-    notesContent={notesContent}
-    meetingType={meetingType}
-    dateString={dateString}
+    brothers={M.brothers}
+    notesContent={M.content}
+    meetingType={M.type}
+    date={M.date}
   />
 
   $ = {
@@ -337,7 +320,7 @@ The meeting was adjourned at 1:48 p.m.`;
     fontFamily: 'Rubik',
     background: 'transparent',
     border: 0,
-    color: moment(dateString, 'MMMM Do, YYYY', true).isValid() ? 'inherit' : Colors.Red,
+    color: M.date.isValid() ? 'inherit' : Colors.Red,
     outline: 0,
   }
 
