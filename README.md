@@ -63,3 +63,8 @@ You bet. Here's the stuff I know about:
 - better designed render button + interface
 - honorific autocompletion (e.g. "isaa<tab>" -> "Brother Master")
 - better flow for rendering the markdown/generating a PDF
+- Flint can now serve assets in the root directory, we should do that.
+- Use Redux
+- Refactor: use ES6 proxies to reduce `MinutesData` boilerplate/copypasta
+- Refactor: pass `M` around, not the stuff it depends on per-se.
+- Refactor: general-purpose "`M` updated" signal, rather than specific `onChange` handlers
