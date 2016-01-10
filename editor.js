@@ -27,7 +27,7 @@ view Editor {
   <AceEditor
     mode='markdown'
     theme='dawn'
-    onChange={newValue => console.warn('editor change ignored')}
+    onChange={view.props.onChange}
     value={view.props.content}
     showGutter={false}
     showPrintMargin={false}

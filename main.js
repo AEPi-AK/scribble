@@ -1,4 +1,12 @@
+import moment from 'moment'
+
 const lower = s => s.toLowerCase()
+
+const sortFn = (a, b) => {
+  if (a.isEBoard && !b.isEBoard) return -1;
+  if (b.isEBoard && !a.isEBoard) return 1;
+  return a.last + a.first < b.last + b.first ? -1 : 1;
+}
 
 const ASCII = {
   Left: 37,
@@ -127,7 +135,10 @@ view MeetingTypeButton {
 }
 
 view Notes {
-  <Editor content={view.props.content}/>
+  <Editor
+    onChange={view.props.onChange}
+    content={view.props.content}
+  />
 
   $ = {
     whiteSpace: 'pre-wrap',
@@ -139,9 +150,61 @@ view Notes {
   }
 }
 
+view RenderedMinutes {
+  let meetingName, presentBrothers, absentBrothers, dateString
+
+  on.props(load)
+
+  const _meetingName = t => {
+    return t == MeetingType.EBoard ? 'Executive Board' : 'Brotherhood'
+  }
+  const formatBrothers = bs => {
+    return bs.length ? '* ' + bs.map(b => b.name).join('\n* ') : ''
+  }
+
+  function load() {
+    let brothers = view.props.brothers.slice().sort(sortFn)
+    meetingName = _meetingName(view.props.meetingType)
+    dateString = view.props.dateString
+    presentBrothers = formatBrothers(brothers.filter(b => b.isPresent))
+    absentBrothers = formatBrothers(brothers.filter(b => !b.isPresent))
+  }
+
+  <pre>{`## Minutes of the ${meetingName} Meeting \
+of the Alpha Kappa Chapter of the Alpha Epsilon Pi Fraternity
+
+### ${dateString}
+
+The following members were present at meeting:
+
+${presentBrothers ? presentBrothers  : '*none*'}
+
+The following members were absent from meeting:
+
+${absentBrothers ? absentBrothers : '*none*'}
+
+---
+
+${view.props.notesContent}`}</pre>
+
+  $ = {
+    overflow: 'scroll',
+    height: '879px'
+  }
+
+  $pre = {
+    padding: 20,
+    paddingTop: 10,
+    paddingBottom: 0,
+    width: '100%',
+    whiteSpace: 'pre-wrap',
+    overflow: 'scroll',
+  }
+}
+
 view MinutesCard {
 
-  const notesContent = `The meeting was called to order at 1:08 p.m.
+  let notesContent = `The meeting was called to order at 1:08 p.m.
 
 ---
 
@@ -198,22 +261,50 @@ The meeting was adjourned at 1:48 p.m.`;
     }
   });
 
+  let dateString = 'December 9th, 2015'
+
+  let render = true
+
   <div class='header'>
-    <title>December 9th, 2015</title>
+    <input type='text'
+      onChange={e => dateString = e.target.value}
+      value={dateString}
+      class='title'
+    />
     <QourumIndicator
       present={brothers.filter(b => b.isPresent).length}
       total={brothers.length}
     />
     <MeetingTypeButton
       type={meetingType}
-      onTypeChange={() => {}}
+      onTypeChange={newMeetingType => meetingType = newMeetingType}
     />
+    <label>{'render'}
+      <input
+        class='render'
+        type='checkbox'
+        checked={render}
+        onChange={() => render = !render}
+      />
+    </label>
   </div>
   <separator/>
-  <Notes content={notesContent}/>
+  <Notes
+    if={!render}
+    content={notesContent}
+    onChange={newContent => notesContent = newContent}
+  />
   <Sidebar
+    if={!render}
     brothers={brothers}
     brothersChanged={newBrothers => brothers = newBrothers}
+  />
+  <RenderedMinutes
+    if={render}
+    brothers={brothers}
+    notesContent={notesContent}
+    meetingType={meetingType}
+    dateString={dateString}
   />
 
   $ = {
@@ -224,6 +315,18 @@ The meeting was adjourned at 1:48 p.m.`;
     boxShadow: `0 2px 5px 0px ${Colors.Shadow}`
   }
 
+  $label = {
+    fontSize: 12,
+    fontWeight: Font.Weight.Light,
+    margin: 10,
+    marginTop: 15,
+    float: 'right',
+  }
+
+  $render = {
+    margin: 10,
+  }
+
   $title = {
     fontWeight: Font.Weight.Medium,
     fontSize: Font.Size.Title,
@@ -231,6 +334,11 @@ The meeting was adjourned at 1:48 p.m.`;
     marginTop: 17,
     marginBottom: 8,
     display: 'inline-block',
+    fontFamily: 'Rubik',
+    background: 'transparent',
+    border: 0,
+    color: moment(dateString, 'MMMM Do, YYYY', true).isValid() ? 'inherit' : Colors.Red,
+    outline: 0,
   }
 
   $separator = {
@@ -290,12 +398,6 @@ view BrotherItem {
 }
 
 view BrotherList {
-
-  const sortFn = (x, y) => {
-    if (x.isEBoard && !y.isEBoard) return -1;
-    if (y.isEBoard && !x.isEBoard) return 1;
-    return x.last + x.first < y.last + y.first ? -1 : 1;
-  }
 
   let brothers = view.props.brothers.slice().sort(sortFn)
 
