@@ -47,3 +47,19 @@ A: For now, here's the process:
 1. Check the 'render' text box in the top right hand corner.
 2. Select all the generated markdown text and copy it into a text file.
 3. Upload that text file here http://markdowntopdf.com/ and download the PDF.
+
+#### Q: Is anything broken/not working?
+
+You bet. Here's the stuff I know about:
+
+- can't change the date (defaults to current date)
+- quorum indicator always reflects brotherhood quorum, even in eboard mode
+- can't add/remove brothers
+- can't have multiple minutes
+- can't really export raw data (unless you wanna do this: `JSON.stringify(localStorage)  ( ͡° ͜ʖ ͡°) `)
+
+#### Q: What are your future plans?
+
+- better designed render button + interface
+- honorific autocompletion (e.g. "isaa<tab>" -> "Brother Master")
+- better flow for rendering the markdown/generating a PDF
