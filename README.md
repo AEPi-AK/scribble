@@ -3,19 +3,19 @@
 #### Keyboard shortcuts (*extremely* useful for attendance! don't use the mouse!!)
 
 
-`ctrl + cmd + /` =  focus the search bar
+`ctrl` + `cmd` + `/` =  focus the search bar
 
-`ctrl + cmd + ↑` = select previous brother
+`ctrl` + `cmd` + `↑` = select previous brother
 
-`ctrl + cmd + ↓` = select next brother
+`ctrl` + `cmd` + `↓` = select next brother
 
-`ctrl + cmd + ←` = mark brother absent
+`ctrl` + `cmd` + `←` = mark brother absent
 
-`ctrl + cmd + →` = mark brother present
+`ctrl` + `cmd` + `→` = mark brother present
 
-`ctrl + cmd + shift + ←` = mark all brothers absent
+`ctrl` + `cmd` + `shift` + `←` = mark all brothers absent
 
-`ctrl + cmd + shift + →` = mark all brothers present
+`ctrl` + `cmd` + `shift` + `→` = mark all brothers present
 
 
 ### FAQ (How I Learned to Stop Worrying and Love Scribble)
