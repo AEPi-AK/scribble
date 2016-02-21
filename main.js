@@ -156,7 +156,8 @@ view Notes {
 }
 
 view RenderedMinutes {
-  let meetingName, presentBrothers, absentBrothers, dateString
+  let meetingName, presentBrothers, absentBrothers
+  let dateOfMeeting, dateOfLastEBoardMeeting, dateOfLastBrotherhoodMeeting
 
   on.props(load)
 
@@ -167,11 +168,15 @@ view RenderedMinutes {
     return bs.length ? '* ' + bs.map(b => b.name).join('\n* ') : ''
   }
 
+  const formatDate = date => date.format(FMT.LongDate)
+
   function load() {
-    let brothers = view.props.brothers.slice().sort(sortFn)
+    const brothers = view.props.brothers.slice().sort(sortFn)
     const isEBoard = view.props.meetingType == MeetingType.EBoard
     meetingName = _meetingName(view.props.meetingType)
-    dateString = moment(view.props.date).format(FMT.LongDate)
+    dateOfMeeting = view.props.date
+    dateOfLastEBoardMeeting = moment(dateOfMeeting).subtract(6, 'day')
+    dateOfLastBrotherhoodMeeting = moment(dateOfMeeting).subtract(7, 'day')
     presentBrothers = formatBrothers(brothers.filter(b => b.isPresent))
     absentBrothers = formatBrothers(brothers.filter(b => {
       return !b.isPresent && (isEBoard ? b.rank : true)
@@ -181,7 +186,7 @@ view RenderedMinutes {
   <pre>{`## Minutes of the ${meetingName} Meeting \
 of the Alpha Kappa Chapter of the Alpha Epsilon Pi Fraternity
 
-### ${dateString}
+### ${formatDate(dateOfMeeting)}
 
 The following members were present at meeting:
 
@@ -192,6 +197,14 @@ The following members were absent from meeting:
 ${absentBrothers ? absentBrothers : '*none*'}
 
 ---
+
+The meeting was called to order at <>}
+
+---
+
+Passing of the Brotherhood Minutes from ${formatDate(dateOfLastBrotherhoodMeeting)}.
+
+Passing of the Executive Board Minutes from ${formatDate(dateOfLastEBoardMeeting)}.
 
 ${view.props.notesContent}`}</pre>
 
@@ -235,8 +248,8 @@ view MinutesCard {
           name: `${brother.first} ${brother.last}`,
         }
       }))
-      ensureDefault('date', moment())
-      ensureDefault('content', `The meeting was called to order at 1:08 p.m.\r\n\r\n---\r\n\r\nPassing of the Brotherhood Minutes from November 29th, 2015.\r\n\r\nPassing of the Executive Board Minutes from November 30th, 2015.\r\n\r\n---\r\n#### The Pledgemaster reported\r\n\r\n- Reaching out to bros for lt pledgemaster.\r\n- Will have decided by next semester.\r\n\r\n---\r\n#### The Sentinel reported\r\n\r\n- Good job not being too risky at semi-formal.\r\n- I didn\'t get a lot of texts this weekend. Text your risk man or let us know in person.\r\n\r\n---\r\n#### The Steward reported\r\n\r\n- Overall, people did a good job this week. Keep it up.\r\n- Looking at ways to change ways of distributing waiter duties. stay tuned next semester. Come talk to me if you have input.\r\n- Please do your waiter duties.\r\n\r\n---\r\n#### The Member at Large reported\r\n\r\n- IFC is this Tuesday at 9:30 p.m.\r\n- Not so much going on. New IFC executive board has been installed, congrats to Brother Loomis. (IFC Exec is now: 2 SAE, 1 Pike, 2 SigEp, 1 Sig Chi, 1 Alpha Sig, 1 AEPi)\r\n- I\'m continuing to talk 1 on 1 to brothers.\r\n\r\n---\r\n#### The Exchequer reported\r\n\r\n- Brother Master: Come light [candles] with me.\r\n\r\n---\r\nGood & Welfare\r\n---\r\nThe meeting was adjourned at 1:48 p.m.`)
+      ensureDefault('date', moment().format(FMT.ShortDate))
+      ensureDefault('content', `#### The Pledgemaster reported\r\n\r\n- Reaching out to bros for lt pledgemaster.\r\n- Will have decided by next semester.\r\n\r\n---\r\n#### The Sentinel reported\r\n\r\n- Good job not being too risky at semi-formal.\r\n- I didn\'t get a lot of texts this weekend. Text your risk man or let us know in person.\r\n\r\n---\r\n#### The Steward reported\r\n\r\n- Overall, people did a good job this week. Keep it up.\r\n- Looking at ways to change ways of distributing waiter duties. stay tuned next semester. Come talk to me if you have input.\r\n- Please do your waiter duties.\r\n\r\n---\r\n#### The Member at Large reported\r\n\r\n- IFC is this Tuesday at 9:30 p.m.\r\n- Not so much going on. New IFC executive board has been installed, congrats to Brother Loomis. (IFC Exec is now: 2 SAE, 1 Pike, 2 SigEp, 1 Sig Chi, 1 Alpha Sig, 1 AEPi)\r\n- I\'m continuing to talk 1 on 1 to brothers.\r\n\r\n---\r\n#### The Exchequer reported\r\n\r\n- Brother Master: Come light [candles] with me.\r\n\r\n---\r\nGood & Welfare\r\n---\r\nThe meeting was adjourned at 1:48 p.m.`)
     }
 
     get type() { return load('type') }
@@ -258,7 +271,7 @@ view MinutesCard {
 
   <div class='header'>
     <input type='text'
-      onChange={e => {M.date = e.target.value}}
+      sync={M.date}
       class='title'
     />
     <QourumIndicator
@@ -293,7 +306,7 @@ view MinutesCard {
     brothers={M.brothers}
     notesContent={M.content}
     meetingType={M.type}
-    date={M.date}
+    date={moment(M.date, FMT.ShortDate)}
   />
 
   $ = {
