@@ -16,7 +16,7 @@ view Editor {
     // editor.setKeyboardHandler("ace/keyboard/vim");
   }
 
-  on.keydown(e => {
+  on.keydown(window, e => {
     if (!(e.ctrlKey && e.metaKey && e.shiftKey) || e.keyCode != ASCII.Slash) {
       return true
     }

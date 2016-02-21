@@ -208,6 +208,7 @@ ${view.props.notesContent}`}</pre>
 }
 
 view MinutesCard {
+
   const save = (k, v) => localStorage.setItem(k, JSON.stringify(v))
 
   const load = k => JSON.parse(localStorage.getItem(k))
@@ -444,7 +445,7 @@ view BrotherList {
     key={_.id}
   />
 
-  on.keydown(e => {
+  on.keydown(window, e => {
     if (!(e.ctrlKey && e.metaKey)) return true
 
     switch (e.keyCode) {
@@ -478,8 +479,6 @@ view BrotherList {
         else setBrothers(setPresent(getBrothers()[selectedIndex], brothers))
         break;
     }
-
-    return true
   })
 
   $ = {
@@ -492,10 +491,9 @@ view BrotherList {
 view SearchBox {
   let searchText = ''
 
-  on.keydown(e => {
+  on.keydown(window, e => {
     if (!(e.ctrlKey && e.metaKey) || e.keyCode != ASCII.Slash) return true
     view.refs.input.focus()
-    return true
   })
 
   <img src='/_/static/search.svg'/>
