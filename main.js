@@ -270,7 +270,6 @@ view MinutesCard {
       <input
         class='render'
         type='checkbox'
-        checked={render}
         onChange={() => render = !render}
       />
     </label>
@@ -354,18 +353,21 @@ view Sidebar {
 
 view BrotherItem {
 
-  <wrapper onClick={view.props.onSelect}>
-    <status onClick={view.props.onToggle}/>
-    <name>{view.props.brother.name}</name>
-  </wrapper>
+  <status onClick={view.props.onToggle}/>
+  <name>{view.props.brother.name}</name>
+
+  on.click(view.props.onSelect)
 
   $ = {
     paddingTop: 5,
     paddingBottom: 5,
     paddingLeft: 13,
-    userSelect: 'none',
     backgroundColor: view.props.isSelected ? '#D6D6D6' : 'transparent',
     cursor: 'pointer',
+    ':hover': {
+      backgroundColor: view.props.isSelected ? '#D6D6D6' : 'hsla(0, 0%, 83%, 0.40)',
+    }
+
   }
 
   $status = {
