@@ -8,8 +8,10 @@ const sortFn = (a, b) => {
   if (a.rank && !b.rank) return -1;
   return a.last + a.first < b.last + b.first ? -1 : 1;
 }
-
-const DATE_FMT = 'MMMM Do, YYYY'
+const FMT = {
+  LongDate: 'MMMM Do, YYYY',
+  ShortDate: 'M/D/YY',
+}
 
 const ASCII = {
   Left: 37,
@@ -169,7 +171,7 @@ view RenderedMinutes {
     let brothers = view.props.brothers.slice().sort(sortFn)
     const isEBoard = view.props.meetingType == MeetingType.EBoard
     meetingName = _meetingName(view.props.meetingType)
-    dateString = view.props.date.format(DATE_FMT, true)
+    dateString = moment(view.props.date).format(FMT.LongDate)
     presentBrothers = formatBrothers(brothers.filter(b => b.isPresent))
     absentBrothers = formatBrothers(brothers.filter(b => {
       return !b.isPresent && (isEBoard ? b.rank : true)
@@ -243,7 +245,7 @@ view MinutesCard {
     get brothers() { return load('brothers') }
     set brothers(v) { save('brothers', v) }
 
-    get date() { return moment(load('date')) }
+    get date() { return load('date') }
     set date(v) { save('date', v) }
 
     get content() { return load('content') }
@@ -256,8 +258,7 @@ view MinutesCard {
 
   <div class='header'>
     <input type='text'
-      onChange={e => M.date = M.date}
-      value={M.date.format(DATE_FMT)}
+      onChange={e => {M.date = e.target.value}}
       class='title'
     />
     <QourumIndicator
@@ -325,7 +326,7 @@ view MinutesCard {
     fontFamily: 'Rubik',
     background: 'transparent',
     border: 0,
-    color: M.date.isValid() ? 'inherit' : Colors.Red,
+    color: moment(M.date, FMT.ShortDate, true).isValid() ? 'inherit' : Colors.Red,
     outline: 0,
   }
 
