@@ -3,8 +3,9 @@ import moment from 'moment'
 const lower = s => s.toLowerCase()
 
 const sortFn = (a, b) => {
-  if (a.isEBoard && !b.isEBoard) return -1;
-  if (b.isEBoard && !a.isEBoard) return 1;
+  if (a.rank && b.rank) return a.rank - b.rank;
+  if (!a.rank && b.rank) return 1;
+  if (a.rank && !b.rank) return -1;
   return a.last + a.first < b.last + b.first ? -1 : 1;
 }
 
@@ -171,7 +172,7 @@ view RenderedMinutes {
     dateString = view.props.date.format(DATE_FMT, true)
     presentBrothers = formatBrothers(brothers.filter(b => b.isPresent))
     absentBrothers = formatBrothers(brothers.filter(b => {
-      return !b.isPresent && (isEBoard ? b.isEBoard : true)
+      return !b.isPresent && (isEBoard ? b.rank : true)
     }))
   }
 
@@ -225,7 +226,8 @@ view MinutesCard {
         return {
           id: i,
           isPresent: true,
-          isEBoard: brother.isEBoard,
+          ddoard: brother.isEBoard,
+          rank: brother.rank,
           first: brother.first,
           last: brother.last,
           name: `${brother.first} ${brother.last}`,
